@@ -1,0 +1,75 @@
+category,command,description
+terminal,ls -la,list all files including hidden
+terminal,ls -lh,list files with human-readable sizes
+terminal,cd ~,go to home directory
+terminal,pwd,show current directory path
+terminal,mkdir -p a/b/c,create nested directories
+terminal,rm -rf dir,delete directory recursively (DANGEROUS)
+terminal,cp -r src dst,copy directory recursively
+terminal,mv src dst,move or rename a file/directory
+terminal,find . -name "*.log",find files by name pattern
+terminal,find . -size +100M,find files larger than 100MB
+terminal,du -sh * | sort -rh | head -5,show top 5 largest directories
+terminal,df -h,show disk usage
+terminal,free -h,show RAM usage
+terminal,cat file,print file contents
+terminal,tail -f file,follow file output in real time
+terminal,grep -r "text" .,search text recursively in directory
+terminal,grep -i "err" app.log,case-insensitive search in file
+terminal,ps aux,list running processes
+terminal,kill -9 PID,force kill a process by PID
+terminal,chmod +x file,make file executable
+terminal,curl -I url,show HTTP response headers
+terminal,wget url,download a file
+terminal,tar -czf out.tar.gz dir,compress directory to tar.gz
+terminal,tar -xzf file.tar.gz,extract tar.gz archive
+terminal,history | grep git,search command history
+terminal,export VAR=val,set environment variable
+terminal,source ~/.bashrc,reload shell configuration
+terminal,ssh user@host,connect to remote server via SSH
+git,git init,initialize a new repository
+git,git clone url,clone a remote repository
+git,git status,show working tree status
+git,git add .,stage all changes
+git,git commit -m "msg",commit staged changes
+git,git push,push commits to remote
+git,git pull,pull latest changes from remote
+git,git log --oneline,show compact commit history
+git,git log -5,show last 5 commits
+git,git log --since="7 days ago",show commits from the last 7 days
+git,git diff,show unstaged changes
+git,git diff --name-only,show only changed file names
+git,git branch,list branches
+git,git checkout -b name,create and switch to new branch
+git,git merge branch,merge a branch into current
+git,git stash,temporarily stash changes
+git,git stash pop,restore stashed changes
+git,git reset --hard HEAD,discard all local changes (DANGEROUS)
+git,git reset HEAD~1,undo last commit keeping changes
+git,git revert hash,revert a specific commit
+git,git blame file,show who changed each line
+git,git shortlog -sn,show commit count per author
+docker,docker ps,list running containers
+docker,docker ps -a,list all containers
+docker,docker images,list available images
+docker,docker pull image,pull an image from registry
+docker,docker run -d image,run container in background
+docker,docker run -it image sh,run container with interactive shell
+docker,docker stop id,stop a running container
+docker,docker rm id,remove a container
+docker,docker rmi image,remove an image
+docker,docker logs -f id,follow container logs
+docker,docker exec -it id sh,open shell in running container
+docker,docker build -t name .,build image from Dockerfile
+docker,docker-compose up -d,start services in background
+docker,docker-compose down,stop and remove services
+docker,docker system prune -f,remove unused containers and images
+docker,docker stats,show live resource usage per container
+npm,npm install,install all dependencies
+npm,npm run dev,start development server
+npm,npm run build,build project for production
+npm,npm test,run test suite
+npm,npm outdated,list outdated packages
+npm,npm audit fix,fix known security vulnerabilities
+npm,yarn add package,add a package with yarn
+npm,yarn remove package,remove a package with yarn
