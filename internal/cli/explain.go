@@ -4,13 +4,15 @@ import (
 	"strings"
 
 	"github.com/muhofy/pilot/internal/ai"
+	"github.com/muhofy/pilot/internal/history"
 	"github.com/muhofy/pilot/internal/ui"
 	"github.com/muhofy/pilot/pkg/cheatsheet"
 )
 
+// Explain describes what a given terminal command does.
 func Explain(args []string) {
 	if len(args) == 0 {
-		ui.Error("Kullanım: pilot explain <komut>")
+		ui.Error("Usage: pilot explain <command>")
 		return
 	}
 
@@ -21,13 +23,14 @@ func Explain(args []string) {
 	}
 
 	query := strings.Join(args, " ")
-	ui.Loading("Düşünüyor...")
+	ui.Loading("Thinking...")
 
-	result, err := ai.Ask(key, cheatsheet.SystemPrompt, "Bu komutu açıkla: "+query)
+	result, err := ai.Ask(key, cheatsheet.SystemPrompt, "Explain this command: "+query)
 	if err != nil {
 		ui.Error(err.Error())
 		return
 	}
 
 	ui.Panel("pilot explain", result, "yellow")
+	history.Save("explain", query, result)
 }

@@ -28,7 +28,7 @@ func main() {
 	case "setup":
 		cli.Setup()
 	default:
-		color.Red("Bilinmeyen komut: %s\n", sub)
+		color.Red("Unknown command: %s\n", sub)
 		cli.Usage()
 	}
 }

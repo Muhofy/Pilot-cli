@@ -10,6 +10,9 @@ import (
 	"strings"
 )
 
+const apiURL = "https://openrouter.ai/api/v1/chat/completions"
+
+// models is the fallback list — tried in order until one succeeds.
 var models = []string{
 	"deepseek/deepseek-chat-v3.1:free",
 	"meta-llama/llama-4-maverick:free",
@@ -39,16 +42,16 @@ type response struct {
 	} `json:"error"`
 }
 
+// GetAPIKey reads OPENROUTER_API_KEY from the environment.
 func GetAPIKey() (string, error) {
 	key := os.Getenv("OPENROUTER_API_KEY")
 	if key == "" {
-		return "", fmt.Errorf("OPENROUTER_API_KEY bulunamadı. Kurmak için: pilot setup")
+		return "", fmt.Errorf("OPENROUTER_API_KEY not found. Run: pilot setup")
 	}
 	return key, nil
 }
 
-const apiURL = "https://openrouter.ai/api/v1/chat/completions"
-
+// ask sends a single request to the given model.
 func ask(apiKey, model, system, prompt string) (string, error) {
 	req := request{
 		Model: model,
@@ -68,38 +71,37 @@ func ask(apiKey, model, system, prompt string) (string, error) {
 
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
-		return "", fmt.Errorf("bağlantı hatası: %v", err)
+		return "", fmt.Errorf("connection error: %v", err)
 	}
 	defer resp.Body.Close()
 
 	raw, _ := io.ReadAll(resp.Body)
 	var r response
 	if err := json.Unmarshal(raw, &r); err != nil {
-		return "", fmt.Errorf("yanıt parse hatası: %s", string(raw))
+		return "", fmt.Errorf("parse error: %s", string(raw))
 	}
 	if r.Error != nil {
 		return "", fmt.Errorf("no endpoints")
 	}
 	if len(r.Choices) == 0 {
-		return "", fmt.Errorf("boş yanıt alındı")
+		return "", fmt.Errorf("empty response")
 	}
 	return r.Choices[0].Message.Content, nil
 }
 
-// isValid checks if the response looks like a real command output
+// isValid checks that the response contains expected output markers.
 func isValid(s string) bool {
 	s = strings.TrimSpace(s)
 	if len(s) < 3 {
 		return false
 	}
-	// Must contain a backtick block or known emoji markers
 	return strings.Contains(s, "```") ||
 		strings.Contains(s, "📌") ||
 		strings.Contains(s, "🔍") ||
 		strings.Contains(s, "📦")
 }
 
-// Ask tries each model in the fallback list until one succeeds
+// Ask tries each model in the fallback list until a valid response is returned.
 func Ask(apiKey, system, prompt string) (string, error) {
 	var lastErr error
 	for _, m := range models {
@@ -112,10 +114,10 @@ func Ask(apiKey, system, prompt string) (string, error) {
 			return "", err
 		}
 		if !isValid(result) {
-			lastErr = fmt.Errorf("geçersiz yanıt")
+			lastErr = fmt.Errorf("invalid response from %s", m)
 			continue
 		}
 		return result, nil
 	}
-	return "", fmt.Errorf("tüm modeller başarısız: %v", lastErr)
+	return "", fmt.Errorf("all models failed: %v", lastErr)
 }

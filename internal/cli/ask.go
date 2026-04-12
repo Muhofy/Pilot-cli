@@ -9,9 +9,10 @@ import (
 	"github.com/muhofy/pilot/pkg/cheatsheet"
 )
 
+// Ask generates a terminal command from a natural language query.
 func Ask(args []string) {
 	if len(args) == 0 {
-		ui.Error("Kullanım: pilot ask <ne yapmak istiyorsun?>")
+		ui.Error("Usage: pilot ask <what do you want to do?>")
 		return
 	}
 
@@ -22,9 +23,9 @@ func Ask(args []string) {
 	}
 
 	query := strings.Join(args, " ")
-	ui.Loading("Düşünüyor...")
+	ui.Loading("Thinking...")
 
-	result, err := ai.Ask(key, cheatsheet.SystemPrompt, "Şunu yapacak terminal komutu üret: "+query)
+	result, err := ai.Ask(key, cheatsheet.SystemPrompt, "Generate a terminal command for: "+query)
 	if err != nil {
 		ui.Error(err.Error())
 		return

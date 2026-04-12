@@ -9,6 +9,7 @@ import (
 	"github.com/muhofy/pilot/internal/ui"
 )
 
+// History handles the history subcommands: list, search, clear.
 func History(args []string) {
 	if len(args) == 0 {
 		listHistory()
@@ -18,51 +19,51 @@ func History(args []string) {
 	switch args[0] {
 	case "search":
 		if len(args) < 2 {
-			ui.Error("Kullanım: pilot history search <kelime>")
+			ui.Error("Usage: pilot history search <keyword>")
 			return
 		}
 		searchHistory(strings.Join(args[1:], " "))
 	case "clear":
 		clearHistory()
 	default:
-		ui.Error("Kullanım: pilot history [search <kelime>] [clear]")
+		ui.Error("Usage: pilot history [search <keyword>] [clear]")
 	}
 }
 
 func listHistory() {
 	entries, err := history.List(20)
 	if err != nil {
-		ui.Error("Geçmiş okunamadı: " + err.Error())
+		ui.Error("Could not read history: " + err.Error())
 		return
 	}
 	if len(entries) == 0 {
-		color.White("Henüz geçmiş yok.")
+		color.White("No history yet.")
 		return
 	}
 
-	color.Cyan("━━━ Son %d Sorgu ━━━\n", len(entries))
+	color.Cyan("━━━ Last %d queries ━━━\n", len(entries))
 	for i, e := range entries {
 		icon := iconFor(e.Type)
 		timeStr := e.Time.Format("02 Jan 15:04")
 		color.White("%2d. %s [%s] %s\n", i+1, icon, timeStr, e.Query)
 	}
 	fmt.Println()
-	color.Yellow("pilot history search <kelime>  → ara")
-	color.Yellow("pilot history clear            → temizle")
+	color.Yellow("pilot history search <keyword>  → search")
+	color.Yellow("pilot history clear             → clear all")
 }
 
 func searchHistory(keyword string) {
 	entries, err := history.Search(keyword)
 	if err != nil {
-		ui.Error("Arama hatası: " + err.Error())
+		ui.Error("Search error: " + err.Error())
 		return
 	}
 	if len(entries) == 0 {
-		color.White("'%s' için sonuç bulunamadı.", keyword)
+		color.White("No results for '%s'.", keyword)
 		return
 	}
 
-	color.Cyan("━━━ '%s' için %d sonuç ━━━\n", keyword, len(entries))
+	color.Cyan("━━━ %d result(s) for '%s' ━━━\n", len(entries), keyword)
 	for i, e := range entries {
 		icon := iconFor(e.Type)
 		timeStr := e.Time.Format("02 Jan 15:04")
@@ -71,17 +72,18 @@ func searchHistory(keyword string) {
 }
 
 func clearHistory() {
-	if !confirm("Tüm geçmiş silinecek, emin misin?") {
-		color.White("İptal edildi.")
+	if !confirm("All history will be deleted. Are you sure?") {
+		color.White("Cancelled.")
 		return
 	}
 	if err := history.Clear(); err != nil {
-		ui.Error("Temizleme hatası: " + err.Error())
+		ui.Error("Clear error: " + err.Error())
 		return
 	}
-	ui.Success("Geçmiş temizlendi.")
+	ui.Success("History cleared.")
 }
 
+// iconFor returns an emoji icon for the given command type.
 func iconFor(typ string) string {
 	switch typ {
 	case "ask":

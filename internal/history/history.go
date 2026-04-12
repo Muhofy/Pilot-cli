@@ -13,14 +13,16 @@ import (
 
 const bucket = "history"
 
+// Entry represents a single history record.
 type Entry struct {
-	ID      string    `json:"id"`
-	Type    string    `json:"type"` // ask | explain | run
-	Query   string    `json:"query"`
-	Result  string    `json:"result"`
-	Time    time.Time `json:"time"`
+	ID     string    `json:"id"`
+	Type   string    `json:"type"` // ask | explain | run
+	Query  string    `json:"query"`
+	Result string    `json:"result"`
+	Time   time.Time `json:"time"`
 }
 
+// dbPath returns the path to the history database (~/.pilot/history.db).
 func dbPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -33,6 +35,7 @@ func dbPath() (string, error) {
 	return filepath.Join(dir, "history.db"), nil
 }
 
+// open opens (or creates) the bbolt database and ensures the bucket exists.
 func open() (*bolt.DB, error) {
 	path, err := dbPath()
 	if err != nil {
@@ -48,6 +51,7 @@ func open() (*bolt.DB, error) {
 	})
 }
 
+// Save stores a query and its result in the history database.
 func Save(typ, query, result string) error {
 	db, err := open()
 	if err != nil {
@@ -69,6 +73,7 @@ func Save(typ, query, result string) error {
 	})
 }
 
+// List returns the most recent n entries, newest first.
 func List(limit int) ([]Entry, error) {
 	db, err := open()
 	if err != nil {
@@ -78,8 +83,7 @@ func List(limit int) ([]Entry, error) {
 
 	var entries []Entry
 	db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		c := b.Cursor()
+		c := tx.Bucket([]byte(bucket)).Cursor()
 		for k, v := c.Last(); k != nil; k, v = c.Prev() {
 			var e Entry
 			if json.Unmarshal(v, &e) == nil {
@@ -94,6 +98,7 @@ func List(limit int) ([]Entry, error) {
 	return entries, nil
 }
 
+// Search returns entries whose query contains the given keyword (case-insensitive).
 func Search(keyword string) ([]Entry, error) {
 	all, err := List(500)
 	if err != nil {
@@ -109,6 +114,7 @@ func Search(keyword string) ([]Entry, error) {
 	return results, nil
 }
 
+// Clear deletes all history entries.
 func Clear() error {
 	db, err := open()
 	if err != nil {

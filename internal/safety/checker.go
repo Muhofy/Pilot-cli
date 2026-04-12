@@ -2,25 +2,28 @@ package safety
 
 import "strings"
 
+// Level represents the danger level of a command.
 type Level int
 
 const (
 	Safe    Level = iota
-	Warning       // Dikkat gerektirir
-	Danger        // Onay zorunlu
+	Warning // Requires caution
+	Danger  // Requires explicit confirmation
 )
 
+// Result holds the safety check outcome.
 type Result struct {
-	Level   Level
-	Reason  string
+	Level  Level
+	Reason string
 }
 
+// dangerPatterns are commands that can cause irreversible damage.
 var dangerPatterns = []string{
 	"rm -rf",
 	"rm -fr",
 	"dd if=",
 	"mkfs",
-	":(){:|:&};:",  // fork bomb
+	":(){:|:&};:", // fork bomb
 	"> /dev/sda",
 	"chmod -R 777",
 	"DROP TABLE",
@@ -28,6 +31,7 @@ var dangerPatterns = []string{
 	"TRUNCATE",
 }
 
+// warningPatterns are commands that require extra care.
 var warningPatterns = []string{
 	"rm ",
 	"git reset --hard",
@@ -41,6 +45,7 @@ var warningPatterns = []string{
 	"format",
 }
 
+// Check evaluates a command string and returns a safety Result.
 func Check(cmd string) Result {
 	lower := strings.ToLower(cmd)
 
@@ -48,7 +53,7 @@ func Check(cmd string) Result {
 		if strings.Contains(lower, strings.ToLower(p)) {
 			return Result{
 				Level:  Danger,
-				Reason: "Bu komut geri alınamaz hasara yol açabilir: " + p,
+				Reason: "This command can cause irreversible damage: " + p,
 			}
 		}
 	}
@@ -57,7 +62,7 @@ func Check(cmd string) Result {
 		if strings.Contains(lower, strings.ToLower(p)) {
 			return Result{
 				Level:  Warning,
-				Reason: "Bu komut dikkat gerektirir: " + p,
+				Reason: "This command requires caution: " + p,
 			}
 		}
 	}

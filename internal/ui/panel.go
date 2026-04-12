@@ -9,6 +9,7 @@ import (
 	"golang.org/x/term"
 )
 
+// termWidth returns the current terminal width, clamped between 40 and 120.
 func termWidth() int {
 	w, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil || w < 40 {
@@ -20,10 +21,12 @@ func termWidth() int {
 	return w - 2
 }
 
+// border builds a horizontal border line with given corner/edge runes.
 func border(w int, left, mid, right string) string {
 	return left + strings.Repeat(mid, w-2) + right
 }
 
+// colorPrint prints text in the given style color.
 func colorPrint(style, text string) {
 	switch style {
 	case "cyan":
@@ -39,9 +42,9 @@ func colorPrint(style, text string) {
 	}
 }
 
+// Panel renders a titled box around content, sized to the terminal width.
 func Panel(title, content, style string) {
 	w := termWidth()
-
 	top := border(w, "┌", "─", "┐")
 	titleLine := "│ " + title + strings.Repeat(" ", max(0, w-4-len(title))) + " │"
 	mid := border(w, "├", "─", "┤")
@@ -54,21 +57,10 @@ func Panel(title, content, style string) {
 	colorPrint(style, bot)
 }
 
-func Loading(msg string) {
-	color.White("⏳ %s", msg)
-}
-
-func Error(msg string) {
-	color.Red("❌ %s\n", msg)
-}
-
-func Success(msg string) {
-	color.Green("✅ %s\n", msg)
-}
-
-func Warning(msg string) {
-	color.Yellow("⚠️  %s\n", msg)
-}
+func Loading(msg string) { color.White("⏳ %s", msg) }
+func Error(msg string)   { color.Red("❌ %s\n", msg) }
+func Success(msg string) { color.Green("✅ %s\n", msg) }
+func Warning(msg string) { color.Yellow("⚠️  %s\n", msg) }
 
 func max(a, b int) int {
 	if a > b {
