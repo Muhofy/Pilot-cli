@@ -7,12 +7,16 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 )
 
-const (
-	apiURL = "https://openrouter.ai/api/v1/chat/completions"
-	model  = "openrouter/free"
-)
+var models = []string{
+	"deepseek/deepseek-chat-v3.1:free",
+	"meta-llama/llama-4-maverick:free",
+	"qwen/qwen3-235b-a22b:free",
+	"google/gemma-3-27b-it:free",
+	"openrouter/free",
+}
 
 type message struct {
 	Role    string `json:"role"`
@@ -43,7 +47,9 @@ func GetAPIKey() (string, error) {
 	return key, nil
 }
 
-func Ask(apiKey, system, prompt string) (string, error) {
+const apiURL = "https://openrouter.ai/api/v1/chat/completions"
+
+func ask(apiKey, model, system, prompt string) (string, error) {
 	req := request{
 		Model: model,
 		Messages: []message{
@@ -72,10 +78,27 @@ func Ask(apiKey, system, prompt string) (string, error) {
 		return "", fmt.Errorf("yanıt parse hatası: %s", string(raw))
 	}
 	if r.Error != nil {
-		return "", fmt.Errorf("AI hatası: %s", r.Error.Message)
+		return "", fmt.Errorf("no endpoints")
 	}
 	if len(r.Choices) == 0 {
 		return "", fmt.Errorf("boş yanıt alındı")
 	}
 	return r.Choices[0].Message.Content, nil
+}
+
+// Ask tries each model in the fallback list until one succeeds
+func Ask(apiKey, system, prompt string) (string, error) {
+	var lastErr error
+	for _, m := range models {
+		result, err := ask(apiKey, m, system, prompt)
+		if err != nil && strings.Contains(err.Error(), "no endpoints") {
+			lastErr = err
+			continue
+		}
+		if err != nil {
+			return "", err
+		}
+		return result, nil
+	}
+	return "", fmt.Errorf("tüm modeller başarısız: %v", lastErr)
 }
