@@ -51,6 +51,21 @@ func GetAPIKey() (string, error) {
 	return key, nil
 }
 
+// SetPreferredModel prepends a user-configured model to the top of the fallback list.
+func SetPreferredModel(model string) {
+	if model == "" {
+		return
+	}
+	// Remove if already present, then prepend
+	filtered := make([]string, 0, len(models))
+	for _, m := range models {
+		if m != model {
+			filtered = append(filtered, m)
+		}
+	}
+	models = append([]string{model}, filtered...)
+}
+
 // ask sends a single request to the given model.
 func ask(apiKey, model, system, prompt string) (string, error) {
 	req := request{

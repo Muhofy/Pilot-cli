@@ -3,11 +3,19 @@ package main
 import (
 	"os"
 
-	"github.com/muhofy/pilot/internal/cli"
 	"github.com/fatih/color"
+	"github.com/muhofy/pilot/internal/ai"
+	"github.com/muhofy/pilot/internal/cli"
+	"github.com/muhofy/pilot/internal/config"
+	"github.com/muhofy/pilot/internal/locale"
 )
 
 func main() {
+	// Load config, initialise locale, apply preferred model
+	cfg := config.Load()
+	locale.Init(cfg.Lang)
+	ai.SetPreferredModel(cfg.Model)
+
 	if len(os.Args) < 2 {
 		cli.Usage()
 		return
@@ -25,10 +33,12 @@ func main() {
 		cli.Run(args)
 	case "history":
 		cli.History(args)
+	case "config":
+		cli.Config(args)
 	case "setup":
 		cli.Setup()
 	default:
-		color.Red("Unknown command: %s\n", sub)
+		color.Red(locale.T("err_unknown_cmd"), sub)
 		cli.Usage()
 	}
 }
