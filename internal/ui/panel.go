@@ -2,48 +2,56 @@ package ui
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/fatih/color"
+	"golang.org/x/term"
 )
 
-const panelWidth = 60
-
-func printBorder(style, pos string) {
-	line := strings.Repeat("─", panelWidth)
-	chars := map[string]map[string]string{
-		"top":    {"cyan": "┌%s┐", "yellow": "┌%s┐", "green": "┌%s┐", "red": "┌%s┐"},
-		"mid":    {"cyan": "├%s┤", "yellow": "├%s┤", "green": "├%s┤", "red": "├%s┤"},
-		"bottom": {"cyan": "└%s┘", "yellow": "└%s┘", "green": "└%s┘", "red": "└%s┘"},
+func termWidth() int {
+	w, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil || w < 40 {
+		return 60
 	}
-	format := chars[pos][style]
+	if w > 120 {
+		return 120
+	}
+	return w - 2
+}
+
+func border(w int, left, mid, right string) string {
+	return left + strings.Repeat(mid, w-2) + right
+}
+
+func colorPrint(style, text string) {
 	switch style {
 	case "cyan":
-		color.Cyan(format, line)
+		color.Cyan("%s", text)
 	case "yellow":
-		color.Yellow(format, line)
+		color.Yellow("%s", text)
 	case "green":
-		color.Green(format, line)
+		color.Green("%s", text)
 	case "red":
-		color.Red(format, line)
+		color.Red("%s", text)
+	default:
+		fmt.Println(text)
 	}
 }
 
 func Panel(title, content, style string) {
-	printBorder(style, "top")
-	switch style {
-	case "cyan":
-		color.Cyan("│ %-*s │", panelWidth-2, title)
-	case "yellow":
-		color.Yellow("│ %-*s │", panelWidth-2, title)
-	case "green":
-		color.Green("│ %-*s │", panelWidth-2, title)
-	case "red":
-		color.Red("│ %-*s │", panelWidth-2, title)
-	}
-	printBorder(style, "mid")
+	w := termWidth()
+
+	top := border(w, "┌", "─", "┐")
+	titleLine := "│ " + title + strings.Repeat(" ", max(0, w-4-len(title))) + " │"
+	mid := border(w, "├", "─", "┤")
+	bot := border(w, "└", "─", "┘")
+
+	colorPrint(style, top)
+	colorPrint(style, titleLine)
+	colorPrint(style, mid)
 	fmt.Println(content)
-	printBorder(style, "bottom")
+	colorPrint(style, bot)
 }
 
 func Loading(msg string) {
@@ -60,4 +68,11 @@ func Success(msg string) {
 
 func Warning(msg string) {
 	color.Yellow("⚠️  %s\n", msg)
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
