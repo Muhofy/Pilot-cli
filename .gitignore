@@ -1,0 +1,20 @@
+# Binary
+pilot
+pilot.exe
+
+# Environment
+.env
+.env.local
+*.env
+
+# Go
+vendor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
