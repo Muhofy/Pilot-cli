@@ -86,6 +86,19 @@ func ask(apiKey, model, system, prompt string) (string, error) {
 	return r.Choices[0].Message.Content, nil
 }
 
+// isValid checks if the response looks like a real command output
+func isValid(s string) bool {
+	s = strings.TrimSpace(s)
+	if len(s) < 3 {
+		return false
+	}
+	// Must contain a backtick block or known emoji markers
+	return strings.Contains(s, "```") ||
+		strings.Contains(s, "📌") ||
+		strings.Contains(s, "🔍") ||
+		strings.Contains(s, "📦")
+}
+
 // Ask tries each model in the fallback list until one succeeds
 func Ask(apiKey, system, prompt string) (string, error) {
 	var lastErr error
@@ -97,6 +110,10 @@ func Ask(apiKey, system, prompt string) (string, error) {
 		}
 		if err != nil {
 			return "", err
+		}
+		if !isValid(result) {
+			lastErr = fmt.Errorf("geçersiz yanıt")
+			continue
 		}
 		return result, nil
 	}
