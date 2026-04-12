@@ -23,6 +23,8 @@ func main() {
 		cli.Explain(args)
 	case "run":
 		cli.Run(args)
+	case "history":
+		cli.History(args)
 	case "setup":
 		cli.Setup()
 	default:

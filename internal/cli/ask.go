@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/muhofy/pilot/internal/ai"
+	"github.com/muhofy/pilot/internal/history"
 	"github.com/muhofy/pilot/internal/ui"
 	"github.com/muhofy/pilot/pkg/cheatsheet"
 )
@@ -30,4 +31,5 @@ func Ask(args []string) {
 	}
 
 	ui.Panel("pilot ask", result, "cyan")
+	history.Save("ask", query, result)
 }

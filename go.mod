@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	github.com/fatih/color v1.17.0
+	go.etcd.io/bbolt v1.4.3
 	golang.org/x/term v0.42.0
 )
 

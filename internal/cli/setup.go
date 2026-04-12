@@ -7,10 +7,13 @@ func Usage() {
   pilot — Terminal komut asistanı
 
   Kullanım:
-    pilot ask     <istek>   → doğal dil → komut üret
-    pilot explain <komut>   → komutu açıkla
-    pilot run     <istek>   → üret + onay al + çalıştır
-    pilot setup             → API key kurulum rehberi
+    pilot ask     <istek>          → doğal dil → komut üret
+    pilot explain <komut>          → komutu açıkla
+    pilot run     <istek>          → üret + onay al + çalıştır
+    pilot history                  → geçmiş sorgular
+    pilot history search <kelime>  → geçmişte ara
+    pilot history clear            → geçmişi temizle
+    pilot setup                    → API key kurulum rehberi
 `)
 }
 
