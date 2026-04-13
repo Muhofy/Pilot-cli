@@ -6,6 +6,11 @@ import (
 	"github.com/muhofy/pilot/internal/ui"
 )
 
+var supportedLangs = map[string]bool{
+	"en": true,
+	"tr": true,
+}
+
 // Config handles the config subcommands: set, show.
 func Config(args []string) {
 	if len(args) == 0 {
@@ -22,11 +27,17 @@ func Config(args []string) {
 			color.Yellow("  e.g.: pilot config set model deepseek/deepseek-chat-v3.1:free")
 			return
 		}
-		if err := config.Set(args[1], args[2]); err != nil {
+		key, value := args[1], args[2]
+		if key == "lang" && !supportedLangs[value] {
+			ui.Error("Unsupported language: " + value)
+			color.Yellow("  Supported: en, tr")
+			return
+		}
+		if err := config.Set(key, value); err != nil {
 			ui.Error("Could not save config: " + err.Error())
 			return
 		}
-		ui.Success("Config updated: " + args[1] + " = " + args[2])
+		ui.Success("Config updated: " + key + " = " + value)
 
 	case "show":
 		showConfig()
