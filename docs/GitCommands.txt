@@ -1,0 +1,6 @@
+git tag v1.0.0-rc1  # → pre-release
+git tag v1.0.0      # → stable release
+
+git tag v1.0.0
+git push origin v1.0.0
+# → pipeline otomatik çalışır, release + binary's installer.
