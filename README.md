@@ -4,7 +4,7 @@
 
 [![CI/CD](https://github.com/muhofy/pilot/actions/workflows/release.yml/badge.svg)](https://github.com/muhofy/pilot/actions)
 [![Go Version](https://img.shields.io/badge/go-1.22-blue)](https://golang.org)
-[![License](https://img.shields.io/github/license/muhofy/pilot)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/muhofy/pilot)](https://github.com/muhofy/pilot/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macOS%20%7C%20windows-lightgrey)](#installation)
 
