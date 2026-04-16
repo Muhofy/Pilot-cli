@@ -7,7 +7,14 @@ set -e
 # ─────────────────────────────────────────────────────────────
 
 APP="pilot"
-REPO="muhofy/pilot"
+REPO="muhofy/Pilot-cli"
+
+# ── Pipe fix: redirect stdin to /dev/tty ─────────────────────
+# When run via curl | bash, stdin is the pipe not the terminal.
+# We reopen stdin from /dev/tty so interactive prompts work.
+if [ ! -t 0 ]; then
+  exec < /dev/tty
+fi
 GITHUB_API="https://api.github.com/repos/${REPO}/releases/latest"
 GITHUB_DL="https://github.com/${REPO}/releases/download"
 ENV_FILE="$HOME/.pilot_env"
