@@ -7,7 +7,7 @@ set -e
 # ─────────────────────────────────────────────────────────────
 
 APP="pilot"
-REPO="muhofy/pilot"
+REPO="muhofy/Pilot-cli"
 GITHUB_API="https://api.github.com/repos/${REPO}/releases/latest"
 GITHUB_DL="https://github.com/${REPO}/releases/download"
 ENV_FILE="$HOME/.pilot_env"
