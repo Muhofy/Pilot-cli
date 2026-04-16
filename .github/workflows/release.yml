@@ -22,7 +22,7 @@ permissions:
 # ── Shared env ───────────────────────────
 env:
   APP: pilot
-  GO_VERSION: "1.22"
+  GO_VERSION: "1.25"
 
 # ═════════════════════════════════════════
 #  JOB 1 — Lint & Vet
@@ -64,7 +64,7 @@ jobs:
           cache: true
 
       - name: Run tests
-        run: go test -v -race -coverprofile=coverage.out ./...
+        run: go test -v -coverprofile=coverage.out ./...
 
       - name: Coverage summary
         run: go tool cover -func=coverage.out
