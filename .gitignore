@@ -21,3 +21,6 @@ Thumbs.db
 
 # ZSHELL
 .zshrc.bak
+
+# FILES AND FOLDERS
+tmp/
