@@ -72,7 +72,12 @@ func searchHistory(keyword string) {
 }
 
 func clearHistory() {
-	if !confirm("All history will be deleted. Are you sure?") {
+	res := ui.Select("All history will be deleted. Are you sure?", []ui.Option{
+		{Label: "Yes, clear all", Value: "yes"},
+		{Label: "No, cancel",     Value: "no"},
+	})
+
+	if res.Value != "yes" {
 		color.White("Cancelled.")
 		return
 	}

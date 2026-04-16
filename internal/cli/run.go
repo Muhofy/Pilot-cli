@@ -1,18 +1,17 @@
 package cli
 
 import (
-	"bufio"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/muhofy/pilot/internal/ai"
 	"github.com/muhofy/pilot/internal/history"
 	"github.com/muhofy/pilot/internal/safety"
 	"github.com/muhofy/pilot/internal/ui"
 	"github.com/muhofy/pilot/pkg/cheatsheet"
-	"github.com/fatih/color"
 )
 
 // Run generates a command, shows a safety check, and executes it after confirmation.
@@ -46,15 +45,27 @@ func Run(args []string) {
 	switch check.Level {
 	case safety.Danger:
 		ui.Panel("⚠️  DANGEROUS COMMAND", check.Reason, "red")
-		color.Red("This cannot be undone. Are you sure?")
 	case safety.Warning:
 		ui.Warning(check.Reason)
 	}
 
-	if confirm("Run this command?") {
+	// Arrow-key confirmation
+	res := ui.Select("Run this command?", []ui.Option{
+		{Label: "Yes",  Value: "yes"},
+		{Label: "No",   Value: "no"},
+		{Label: "Exit", Value: "exit"},
+	})
+
+	switch res.Value {
+	case "yes":
 		execCommand(cmd)
 		history.Save("run", query, cmd)
-	} else {
+	case "no":
+		color.White("Cancelled.")
+	case "exit":
+		color.White("Exiting.")
+		os.Exit(0)
+	default:
 		color.White("Cancelled.")
 	}
 }
@@ -76,7 +87,6 @@ func extractCommand(text string) string {
 	if len(cmd) > 0 {
 		return strings.TrimSpace(strings.Join(cmd, "\n"))
 	}
-	// Fallback: return first non-empty, non-emoji line
 	for _, l := range lines {
 		l = strings.TrimSpace(l)
 		if l != "" && !strings.HasPrefix(l, "📌") {
@@ -84,15 +94,6 @@ func extractCommand(text string) string {
 		}
 	}
 	return strings.TrimSpace(text)
-}
-
-// confirm prompts the user for a yes/no answer.
-func confirm(prompt string) bool {
-	color.Yellow(prompt + " [y/n]: ")
-	sc := bufio.NewScanner(os.Stdin)
-	sc.Scan()
-	ans := strings.ToLower(strings.TrimSpace(sc.Text()))
-	return ans == "y" || ans == "yes"
 }
 
 // execCommand runs a shell command in the current terminal session.

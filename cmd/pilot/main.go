@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	// Load config, initialise locale, apply preferred model
 	cfg := config.Load()
 	locale.Init(cfg.Lang)
 	ai.SetPreferredModel(cfg.Model)
@@ -37,6 +36,8 @@ func main() {
 		cli.Config(args)
 	case "setup":
 		cli.Setup()
+	case "completion":
+		cli.Completion(args)
 	default:
 		color.Red(locale.T("err_unknown_cmd"), sub)
 		cli.Usage()
