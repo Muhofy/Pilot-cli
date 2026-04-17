@@ -93,23 +93,32 @@ arrow_select() {
   _draw "first"
 
   while true; do
-    local key
-    key=$(dd bs=3 count=1 2>/dev/null </dev/tty)
+    local k1 k2 k3
+    # Read one char at a time from /dev/tty
+    IFS= read -r -s -n1 k1 </dev/tty
+    # Check for escape sequence
+    if [[ "$k1" == $'\x1b' ]]; then
+      IFS= read -r -s -n1 -t 0.1 k2 </dev/tty || true
+      IFS= read -r -s -n1 -t 0.1 k3 </dev/tty || true
+    fi
 
-    case "$key" in
-      $'\x1b\x5b\x41'|k)
-        (( cursor > 0 )) && (( cursor-- )) || cursor=$(( n - 1 ))
-        _draw ;;
-      $'\x1b\x5b\x42'|j)
-        (( cursor < n-1 )) && (( cursor++ )) || cursor=0
-        _draw ;;
-      $'\x0d'|$'\x0a'|'')
-        break ;;
-      $'\x03'|$'\x1b')
-        _restore
-        nl
-        error "Aborted." ;;
-    esac
+    if [[ "$k1" == $'\x1b' && "$k2" == '[' && "$k3" == 'A' ]] || [[ "$k1" == 'k' ]]; then
+      # Arrow Up
+      (( cursor > 0 )) && (( cursor-- )) || cursor=$(( n - 1 ))
+      _draw
+    elif [[ "$k1" == $'\x1b' && "$k2" == '[' && "$k3" == 'B' ]] || [[ "$k1" == 'j' ]]; then
+      # Arrow Down
+      (( cursor < n-1 )) && (( cursor++ )) || cursor=0
+      _draw
+    elif [[ "$k1" == '' || "$k1" == $'\n' || "$k1" == $'\r' ]]; then
+      # Enter
+      break
+    elif [[ "$k1" == $'\x03' ]]; then
+      # Ctrl+C
+      _restore
+      nl
+      error "Aborted."
+    fi
   done
 
   _restore
