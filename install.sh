@@ -3,7 +3,7 @@ set -e
 
 # ─────────────────────────────────────────────────────────────
 #  pilot — Installer
-#  curl -fsSL https://raw.githubusercontent.com/muhofy/Pilot-cli/main/install.sh | bash
+#  curl -fsSL https://raw.githubusercontent.com/muhofy/Pilot-cli/main/install.sh -o install.sh && bash install.sh
 # ─────────────────────────────────────────────────────────────
 
 APP="pilot"
@@ -13,19 +13,11 @@ GITHUB_DL="https://github.com/${REPO}/releases/download"
 ENV_FILE="$HOME/.pilot_env"
 CONFIG_FILE="$HOME/.pilot/config.json"
 
-# ── Pipe fix ─────────────────────────────────────────────────
-# curl | bash durumunda stdin pipe'a bağlı, terminale değil.
-# /dev/tty'den yeniden açıyoruz.
-if [ ! -t 0 ]; then
-  exec < /dev/tty
-fi
-
 # ── ANSI ─────────────────────────────────────────────────────
 R='\033[0;31m'
 G='\033[0;32m'
 Y='\033[1;33m'
 C='\033[0;36m'
-W='\033[0;37m'
 DIM='\033[2m'
 BOLD='\033[1m'
 NC='\033[0m'
@@ -62,16 +54,16 @@ arrow_select() {
   local cursor=0
 
   local old_stty
-  old_stty=$(stty -g </dev/tty 2>/dev/null) || true
+  old_stty=$(stty -g 2>/dev/null) || true
 
   _restore() {
-    stty "$old_stty" </dev/tty 2>/dev/null || true
-    tput cnorm </dev/tty 2>/dev/null || true
+    stty "$old_stty" 2>/dev/null || true
+    tput cnorm 2>/dev/null || true
   }
   trap _restore EXIT INT TERM
 
-  tput civis </dev/tty 2>/dev/null || true
-  stty raw -echo </dev/tty 2>/dev/null || true
+  tput civis 2>/dev/null || true
+  stty raw -echo 2>/dev/null || true
 
   _draw() {
     if [ "$1" != "first" ]; then
@@ -94,27 +86,21 @@ arrow_select() {
 
   while true; do
     local k1 k2 k3
-    # Read one char at a time from /dev/tty
-    IFS= read -r -s -n1 k1 </dev/tty
-    # Check for escape sequence
+    IFS= read -r -s -n1 k1
     if [[ "$k1" == $'\x1b' ]]; then
-      IFS= read -r -s -n1 -t 0.1 k2 </dev/tty || true
-      IFS= read -r -s -n1 -t 0.1 k3 </dev/tty || true
+      IFS= read -r -s -n1 -t 0.1 k2 || true
+      IFS= read -r -s -n1 -t 0.1 k3 || true
     fi
 
     if [[ "$k1" == $'\x1b' && "$k2" == '[' && "$k3" == 'A' ]] || [[ "$k1" == 'k' ]]; then
-      # Arrow Up
       (( cursor > 0 )) && (( cursor-- )) || cursor=$(( n - 1 ))
       _draw
     elif [[ "$k1" == $'\x1b' && "$k2" == '[' && "$k3" == 'B' ]] || [[ "$k1" == 'j' ]]; then
-      # Arrow Down
       (( cursor < n-1 )) && (( cursor++ )) || cursor=0
       _draw
     elif [[ "$k1" == '' || "$k1" == $'\n' || "$k1" == $'\r' ]]; then
-      # Enter
       break
     elif [[ "$k1" == $'\x03' ]]; then
-      # Ctrl+C
       _restore
       nl
       error "Aborted."
@@ -133,21 +119,15 @@ arrow_select() {
 download_with_progress() {
   local url="$1"
   local out="$2"
-
-  nl
-  echo -e "  ${C}Downloading pilot...${NC}"
-  nl
-
   local bar_width=40
   local spinner_chars="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
   local spin_idx=0
 
   _draw_bar() {
-    local pct=$1
-    local speed=$2
+    local pct=$1 speed=$2
     local filled=$(( pct * bar_width / 100 ))
     local empty=$(( bar_width - filled ))
-    local bar=""
+    local bar="" i
     for (( i=0; i<filled; i++ )); do bar+="█"; done
     for (( i=0; i<empty;  i++ )); do bar+="░"; done
     local spin="${spinner_chars:$spin_idx:1}"
@@ -156,44 +136,47 @@ download_with_progress() {
       "$spin" "$bar" "$pct" "$speed"
   }
 
+  nl
+  info "Downloading ${APP} ${VERSION}..."
+  nl
+
   if command -v curl &>/dev/null; then
     curl -fsSL --progress-bar "$url" -o "$out" 2>&1 | while IFS= read -r line; do
       local pct
       pct=$(echo "$line" | grep -oE '[0-9]+' | head -1 || echo 0)
       [ -n "$pct" ] && _draw_bar "$pct" ""
     done
-    printf "\r  ${G}✓${NC} [$(printf '█%.0s' $(seq 1 $bar_width))] ${BOLD}100%%${NC}            \n"
   elif command -v wget &>/dev/null; then
     wget -q --show-progress "$url" -O "$out" 2>&1 | while IFS= read -r line; do
-      local pct
+      local pct speed
       pct=$(echo "$line" | grep -oP '\d+(?=%)' | tail -1 || echo 0)
-      local speed
       speed=$(echo "$line" | grep -oP '[\d.]+[KMG]B/s' | tail -1 || echo "")
       [ -n "$pct" ] && _draw_bar "$pct" "$speed"
     done
-    printf "\r  ${G}✓${NC} [$(printf '█%.0s' $(seq 1 $bar_width))] ${BOLD}100%%${NC}            \n"
   else
     error "curl or wget is required"
   fi
 
+  printf "\r  ${G}✓${NC} [$(printf '█%.0s' $(seq 1 $bar_width))] ${BOLD}100%%${NC}            \n"
   nl
 }
 
 # ── Detect platform ───────────────────────────────────────────
 detect_platform() {
-  OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-  ARCH=$(uname -m)
+  local os arch
+  os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  arch=$(uname -m)
 
-  case "$OS" in
+  case "$os" in
     linux)  OS="linux" ;;
     darwin) OS="darwin" ;;
-    *)      error "Unsupported OS: $OS" ;;
+    *)      error "Unsupported OS: $os" ;;
   esac
 
-  case "$ARCH" in
-    x86_64|amd64) ARCH="amd64" ;;
+  case "$arch" in
+    x86_64|amd64)  ARCH="amd64" ;;
     aarch64|arm64) ARCH="arm64" ;;
-    *) error "Unsupported architecture: $ARCH" ;;
+    *) error "Unsupported architecture: $arch" ;;
   esac
 
   BINARY="${APP}-${OS}-${ARCH}"
@@ -221,14 +204,12 @@ detect_shell() {
 
 # ── Fetch latest version ──────────────────────────────────────
 fetch_version() {
-  info "Fetching latest release..."
   if command -v curl &>/dev/null; then
     VERSION=$(curl -fsSL "$GITHUB_API" | grep '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')
   else
     VERSION=$(wget -qO- "$GITHUB_API" | grep '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')
   fi
   [ -z "$VERSION" ] && error "Could not fetch latest version."
-  success "Latest version: ${BOLD}${VERSION}${NC}"
 }
 
 # ── Write config ──────────────────────────────────────────────
@@ -250,30 +231,24 @@ write_api_key() {
 
 # ── Add to shell profile ──────────────────────────────────────
 add_to_profile() {
-  local shell="$1"
-  local profile=""
-
+  local shell="$1" profile=""
   case "$shell" in
     zsh)  profile="$HOME/.zshrc" ;;
     fish) profile="$HOME/.config/fish/config.fish" ;;
     *)    profile="$HOME/.bashrc" ;;
   esac
 
-  local source_line='[ -f "$HOME/.pilot_env" ] && source "$HOME/.pilot_env"'
-  local completion_line=""
+  local src='[ -f "$HOME/.pilot_env" ] && source "$HOME/.pilot_env"'
+  local cmp=""
   case "$shell" in
-    zsh)  completion_line='eval "$(pilot completion zsh)"' ;;
-    fish) completion_line='pilot completion fish | source' ;;
-    *)    completion_line='eval "$(pilot completion bash)"' ;;
+    zsh)  cmp='eval "$(pilot completion zsh)"' ;;
+    fish) cmp='pilot completion fish | source' ;;
+    *)    cmp='eval "$(pilot completion bash)"' ;;
   esac
 
-  if [ -f "$profile" ]; then
-    grep -qF '.pilot_env'      "$profile" || echo "$source_line"      >> "$profile"
-    grep -qF 'pilot completion' "$profile" || echo "$completion_line" >> "$profile"
-  else
-    echo "$source_line"      >> "$profile"
-    echo "$completion_line"  >> "$profile"
-  fi
+  mkdir -p "$(dirname "$profile")"
+  grep -qF '.pilot_env'       "$profile" 2>/dev/null || echo "$src" >> "$profile"
+  grep -qF 'pilot completion' "$profile" 2>/dev/null || echo "$cmp" >> "$profile"
 
   success "Profile updated: ${DIM}${profile}${NC}"
 }
@@ -290,12 +265,8 @@ main() {
   # ── Step 1: Language ───────────────────────────────────────
   echo -e "  ${BOLD}Step 1 of 4${NC}  ${DIM}Language${NC}"
   nl
-  arrow_select "Select your language" \
-    "English" \
-    "Turkish / Türkçe"
-
+  arrow_select "Select your language" "English" "Turkish / Türkçe"
   case "$ARROW_INDEX" in
-    0) LANG_CODE="en" ;;
     1) LANG_CODE="tr" ;;
     *) LANG_CODE="en" ;;
   esac
@@ -306,18 +277,17 @@ main() {
   echo -e "  ${BOLD}Step 2 of 4${NC}  ${DIM}AI Model${NC}"
   nl
   arrow_select "Select AI model" \
-    "DeepSeek v3.1     (recommended)" \
+    "DeepSeek v3.1  (recommended)" \
     "Llama 4 Maverick" \
     "Qwen3 235B" \
     "Gemma 3 27B" \
     "Auto (fallback)"
-
   case "$ARROW_INDEX" in
     0) MODEL="deepseek/deepseek-chat-v3.1:free" ;;
     1) MODEL="meta-llama/llama-4-maverick:free" ;;
     2) MODEL="qwen/qwen3-235b-a22b:free" ;;
     3) MODEL="google/gemma-3-27b-it:free" ;;
-    4) MODEL="" ;;
+    *) MODEL="" ;;
   esac
   success "Model: ${BOLD}${MODEL:-auto}${NC}"
   nl
@@ -325,11 +295,7 @@ main() {
   # ── Step 3: Shell ──────────────────────────────────────────
   echo -e "  ${BOLD}Step 3 of 4${NC}  ${DIM}Shell  (detected: ${DETECTED_SHELL})${NC}"
   nl
-  arrow_select "Select your shell" \
-    "bash" \
-    "zsh" \
-    "fish"
-
+  arrow_select "Select your shell" "bash" "zsh" "fish"
   CHOSEN_SHELL="$ARROW_RESULT"
   success "Shell: ${BOLD}${CHOSEN_SHELL}${NC}"
   nl
@@ -343,14 +309,14 @@ main() {
   local api_key=""
   while true; do
     printf "  ${Y}❯${NC} Paste your API key: "
-    read -rs api_key </dev/tty
+    read -rs api_key
     nl
     if [ -z "$api_key" ]; then
       warn "API key cannot be empty."
     elif [[ ! "$api_key" == sk-or-* ]]; then
-      warn "Key doesn't look right (should start with sk-or-). Continue anyway?"
-      printf "  ${Y}?${NC} [y/n]: "
-      read -r confirm </dev/tty
+      warn "Key doesn't look right (should start with sk-or-)."
+      printf "  ${Y}?${NC} Continue anyway? [y/n]: "
+      read -r confirm
       [[ "$confirm" == "y" || "$confirm" == "yes" ]] && break
     else
       break
@@ -359,7 +325,7 @@ main() {
   success "API key saved"
   nl
 
-  # ── Download ───────────────────────────────────────────────
+  # ── Download + Install ─────────────────────────────────────
   fetch_version
   local url="${GITHUB_DL}/${VERSION}/${BINARY}"
   local tmp_bin
