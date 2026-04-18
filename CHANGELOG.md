@@ -18,6 +18,31 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.8.0] — 2026-04-19
+
+### Added
+- Homebrew formula (`brew tap muhofy/tap && brew install pilot`)
+- GitHub Actions: auto-update Homebrew formula on release tag
+- `homebrew-tap` repo: `Formula/pilot.rb`
+
+---
+
+## [0.7.0] — 2026-04-19
+
+### Added
+- `--version` / `-v` / `version` flag — version injected via `-ldflags`
+- `internal/ui/spinner.go` — animated braille spinner component
+- `ask.go`, `explain.go`, `run.go` — `Loading()` replaced with `Spinner`
+
+### Fixed
+- `pilot run` parser: `extractCommand()` rewritten with regex
+  - Strategy 1: fenced code block (` ``` `)
+  - Strategy 2: inline backtick
+  - Strategy 3: first line matching command pattern
+  - Previously picked up text outside code blocks
+
+---
+
 ## [0.6.0] — 2026-04-19
 
 ### Added
@@ -115,7 +140,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/muhofy/Pilot-cli/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/muhofy/Pilot-cli/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/muhofy/Pilot-cli/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/muhofy/Pilot-cli/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/muhofy/Pilot-cli/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/muhofy/Pilot-cli/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/muhofy/Pilot-cli/compare/v0.3.0...v0.4.0

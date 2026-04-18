@@ -50,7 +50,8 @@ Works on Linux, macOS, and Termux (Android). Detects your OS and architecture au
 ### Homebrew (macOS / Linux)
 
 ```bash
-brew install muhofy/tap/pilot
+brew tap muhofy/tap
+brew install pilot
 ```
 
 ### Manual
