@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/fatih/color"
@@ -9,6 +10,9 @@ import (
 	"github.com/muhofy/pilot/internal/config"
 	"github.com/muhofy/pilot/internal/locale"
 )
+
+// Version is injected at build time via -ldflags "-X main.Version=x.x.x"
+var Version = "dev"
 
 func main() {
 	cfg := config.Load()
@@ -38,6 +42,8 @@ func main() {
 		cli.Setup()
 	case "completion":
 		cli.Completion(args)
+	case "--version", "-v", "version":
+		fmt.Printf("pilot %s\n", Version)
 	default:
 		color.Red(locale.T("err_unknown_cmd"), sub)
 		cli.Usage()

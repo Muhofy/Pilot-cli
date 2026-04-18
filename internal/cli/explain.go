@@ -23,9 +23,12 @@ func Explain(args []string) {
 	}
 
 	query := strings.Join(args, " ")
-	ui.Loading("Thinking...")
 
+	sp := ui.NewSpinner("Thinking...")
+	sp.Start()
 	result, err := ai.Ask(key, cheatsheet.SystemPrompt, "Explain this command: "+query)
+	sp.Stop()
+
 	if err != nil {
 		ui.Error(err.Error())
 		return

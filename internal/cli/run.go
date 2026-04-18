@@ -3,6 +3,7 @@ package cli
 import (
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -28,19 +29,25 @@ func Run(args []string) {
 	}
 
 	query := strings.Join(args, " ")
-	ui.Loading("Generating command...")
 
+	sp := ui.NewSpinner("Thinking...")
+	sp.Start()
 	result, err := ai.Ask(key, cheatsheet.SystemPrompt,
 		"Generate ONLY the terminal command (no explanation): "+query)
+	sp.Stop()
 	if err != nil {
 		ui.Error(err.Error())
 		return
 	}
 
 	cmd := extractCommand(result)
+	if cmd == "" {
+		ui.Error("Could not extract a command from the response.")
+		return
+	}
+
 	ui.Panel("Generated Command", cmd, "green")
 
-	// Safety check
 	check := safety.Check(cmd)
 	switch check.Level {
 	case safety.Danger:
@@ -49,7 +56,6 @@ func Run(args []string) {
 		ui.Warning(check.Reason)
 	}
 
-	// Arrow-key confirmation
 	res := ui.Select("Run this command?", []ui.Option{
 		{Label: "Yes",  Value: "yes"},
 		{Label: "No",   Value: "no"},
@@ -60,10 +66,7 @@ func Run(args []string) {
 	case "yes":
 		execCommand(cmd)
 		history.Save("run", query, cmd)
-	case "no":
-		color.White("Cancelled.")
 	case "exit":
-		color.White("Exiting.")
 		os.Exit(0)
 	default:
 		color.White("Cancelled.")
@@ -71,28 +74,41 @@ func Run(args []string) {
 }
 
 // extractCommand pulls the shell command out of a markdown code block.
+// Fixes: previously picked up text outside ``` blocks.
 func extractCommand(text string) string {
-	lines := strings.Split(text, "\n")
-	var cmd []string
-	inBlock := false
-	for _, l := range lines {
-		if strings.HasPrefix(l, "```") {
-			inBlock = !inBlock
+	// Strategy 1: extract content inside first ``` block
+	re := regexp.MustCompile("(?s)```(?:bash|sh|shell|zsh)?\n?(.*?)```")
+	matches := re.FindStringSubmatch(text)
+	if len(matches) > 1 {
+		cmd := strings.TrimSpace(matches[1])
+		if cmd != "" {
+			return cmd
+		}
+	}
+
+	// Strategy 2: single backtick inline code
+	reInline := regexp.MustCompile("`([^`]+)`")
+	inlineMatches := reInline.FindStringSubmatch(text)
+	if len(inlineMatches) > 1 {
+		cmd := strings.TrimSpace(inlineMatches[1])
+		if cmd != "" {
+			return cmd
+		}
+	}
+
+	// Strategy 3: first non-empty line that looks like a command
+	// (does not start with emoji, #, or plain prose words)
+	reCmd := regexp.MustCompile(`^[a-zA-Z$./~_-]`)
+	for _, line := range strings.Split(text, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
 			continue
 		}
-		if inBlock {
-			cmd = append(cmd, l)
+		if reCmd.MatchString(line) {
+			return line
 		}
 	}
-	if len(cmd) > 0 {
-		return strings.TrimSpace(strings.Join(cmd, "\n"))
-	}
-	for _, l := range lines {
-		l = strings.TrimSpace(l)
-		if l != "" && !strings.HasPrefix(l, "📌") {
-			return l
-		}
-	}
+
 	return strings.TrimSpace(text)
 }
 
