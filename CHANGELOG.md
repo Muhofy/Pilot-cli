@@ -18,7 +18,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [0.5.0] — 2026-04-10
+## [0.6.0] — 2026-04-19
+
+### Added
+- `internal/ui/prompt.go` — arrow-key interactive select component (pure bash, no new deps)
+- `pilot config set model` — interactive model picker with arrow keys
+- `pilot config set lang` — interactive language picker with arrow keys
+- Unknown model warning + confirmation prompt in config
+- Shell completion for bash, zsh, fish (`pilot completion <shell>`)
+- `pilot history clear` — now uses arrow-key confirmation
+
+### Changed
+- `pilot run` — `confirm()` replaced with `ui.Select()` (Yes / No / Exit)
+- `install.sh` — full rewrite, clean binary download only, no wizard
+- `setup.go` — usage updated with completion command
+
+---
+
+## [0.5.0] — 2026-04-11
 
 ### Added
 - Localisation system (`internal/locale`)
@@ -27,18 +44,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `locale.T(key, args...)` — typed string lookup with fallback to key
 - Auto-detection of system language via `$LANG`, `$LANGUAGE`, `$LC_ALL`
 - All locale JSON files embedded into binary via `//go:embed`
+- Lang validation in `pilot config set lang` — only supported codes accepted
+
+> Commits: `a30eba1` `f3f6694`
 
 ---
 
-## [0.4.0] — 2026-04-11
+## [0.4.0] — 2026-04-10
 
 ### Added
 - `~/.pilot/config.json` — persistent user settings (lang, model)
 - `pilot config set model <model>` — override preferred AI model
 - `pilot config set lang <lang>` — set UI language
 - `pilot config show` — display current config
-- Lang validation — only supported language codes accepted
 - Preferred model prepended to fallback list at startup
+
+> Commits: `a30eba1`
 
 ---
 
@@ -50,6 +71,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `pilot history clear` — delete all history with confirmation prompt
 - History stored in `~/.pilot/history.db` using `go.etcd.io/bbolt` (pure Go, no CGO)
 - History auto-saved for `ask`, `explain`, and `run` commands
+
+> Commits: `8f3d9d9`
 
 ---
 
@@ -71,8 +94,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - Tightened system prompt to prevent non-command AI output
 - Migrated to standard Go project layout (`cmd/`, `internal/`, `pkg/`)
 
-### Fixed
-- AI response occasionally returning prose instead of a command block
+> Commits: `553f1eb` `72054f8` `72b9d19` `efc5da6` `0cc1a77` `e42933e` `00d9ecb` `1c4a774`
 
 ---
 
@@ -89,11 +111,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - Colored terminal output via `github.com/fatih/color`
 - Cross-platform support: Linux, macOS, Windows
 
+> Commits: `553f1eb`
+
 ---
 
-[Unreleased]: https://github.com/muhofy/pilot/compare/v0.5.0...HEAD
-[0.5.0]: https://github.com/muhofy/pilot/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/muhofy/pilot/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/muhofy/pilot/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/muhofy/pilot/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/muhofy/pilot/releases/tag/v0.1.0
+[Unreleased]: https://github.com/muhofy/Pilot-cli/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/muhofy/Pilot-cli/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/muhofy/Pilot-cli/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/muhofy/Pilot-cli/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/muhofy/Pilot-cli/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/muhofy/Pilot-cli/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/muhofy/Pilot-cli/releases/tag/v0.1.0
