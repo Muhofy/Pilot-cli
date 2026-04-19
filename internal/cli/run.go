@@ -115,10 +115,21 @@ func extractCommand(text string) string {
 // execCommand runs a shell command in the current terminal session.
 func execCommand(cmd string) {
 	var c *exec.Cmd
-	if runtime.GOOS == "windows" {
-		c = exec.Command("cmd", "/C", cmd)
-	} else {
-		c = exec.Command("sh", "-c", cmd)
+	switch runtime.GOOS {
+	case "windows":
+		// Try PowerShell first, fall back to cmd
+		if _, err := exec.LookPath("powershell"); err == nil {
+			c = exec.Command("powershell", "-NoProfile", "-Command", cmd)
+		} else {
+			c = exec.Command("cmd", "/C", cmd)
+		}
+	default:
+		// Use $SHELL if available, fall back to sh
+		shell := os.Getenv("SHELL")
+		if shell == "" {
+			shell = "sh"
+		}
+		c = exec.Command(shell, "-c", cmd)
 	}
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
