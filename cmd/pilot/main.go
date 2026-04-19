@@ -49,6 +49,8 @@ func main() {
 		cli.Setup()
 	case "completion":
 		cli.Completion(args)
+	case "chain":
+		cli.Chain(args)
 	case "update":
 		cli.Update(Version)
 	case "--version", "-v", "version":

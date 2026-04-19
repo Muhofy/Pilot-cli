@@ -97,6 +97,8 @@ func iconFor(typ string) string {
 		return "📖"
 	case "run":
 		return "▶️ "
+	case "chain":
+		return "⛓️ "
 	default:
 		return "•"
 	}

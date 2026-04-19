@@ -11,6 +11,9 @@ func Usage() {
     pilot ask        <request>         → natural language → generate command
     pilot explain    <command>         → explain a command
     pilot run        <request>         → generate + confirm + execute
+    pilot chain      <steps>           → chain multiple steps into one command
+    pilot chain      --dry <steps>     → preview chain without executing
+    pilot update                       → check for updates and install latest
     pilot history                      → show recent queries
     pilot history    search <keyword>  → search history
     pilot history    clear             → clear all history
@@ -25,17 +28,14 @@ func Usage() {
 // Setup prints the API key setup instructions.
 func Setup() {
 	color.Cyan(`
-  pilot — Setup Guide
-  ───────────────────
-  1. Go to https://openrouter.ai/keys
-  2. Sign up or log in
-  3. Click "Create Key"
-  4. Export your key:
+  pilot — Setup
+  ─────────────
+  1. Get a free API key: https://openrouter.ai/keys
 
+  2. Export it:
      export OPENROUTER_API_KEY=your_key_here
 
-  5. To persist across sessions, add to ~/.zshrc or ~/.bashrc:
-
+  3. Persist it:
      echo 'export OPENROUTER_API_KEY=your_key' >> ~/.zshrc
      source ~/.zshrc
 `)
