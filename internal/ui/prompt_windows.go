@@ -11,8 +11,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// Select on Windows falls back to numbered menu since raw terminal
-// mode behaves differently with Windows Console API.
+// Select on Windows uses numbered menu (raw terminal not supported).
 func Select(question string, options []Option) SelectResult {
 	colorQuestion := color.New(color.FgYellow, color.Bold)
 	colorSelected := color.New(color.FgCyan, color.Bold)
