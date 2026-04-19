@@ -18,6 +18,28 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.9.1] — 2026-04-19
+
+### Added
+- `pilot chain <steps>` — chain multiple steps into one command via AI
+- `pilot chain --dry <steps>` — preview generated chain without executing
+- `⛓️` icon for chain entries in history
+- Custom system prompt for chain commands — enforces `&&` / `|` structure
+
+---
+
+## [0.9.0] — 2026-04-19
+
+### Added
+- `pilot update` — check for latest release and self-update via `install.sh`
+- `internal/update/checker.go` — background version check once per day
+- Update hint shown after `ask`, `explain`, `run` when new version available:
+  `💡 New version available: vX.X.X → run: pilot update`
+- Semver comparison with `isNewer()` — handles major/minor/patch correctly
+- Update check timestamp stored in `~/.pilot/.update_check`
+
+---
+
 ## [0.8.0] — 2026-04-19
 
 ### Added
@@ -140,7 +162,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/muhofy/Pilot-cli/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/muhofy/Pilot-cli/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/muhofy/Pilot-cli/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/muhofy/Pilot-cli/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/muhofy/Pilot-cli/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/muhofy/Pilot-cli/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/muhofy/Pilot-cli/compare/v0.5.0...v0.6.0
