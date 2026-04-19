@@ -9,6 +9,10 @@ import (
 var supportedLangs = map[string]bool{
 	"en": true,
 	"tr": true,
+	"de": true,
+	"es": true,
+	"fr": true,
+	"zh": true,
 }
 
 // knownModels is the list of known free OpenRouter models.

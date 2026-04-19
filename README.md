@@ -225,6 +225,10 @@ Pilot automatically detects and warns about destructive commands:
 ```bash
 pilot config set lang en   # English (default)
 pilot config set lang tr   # Turkish
+pilot config set lang de   # German
+pilot config set lang es   # Spanish
+pilot config set lang fr   # French
+pilot config set lang zh   # Chinese
 ```
 
 System language is auto-detected from `$LANG` / `$LANGUAGE` / `$LC_ALL`.

@@ -14,6 +14,18 @@ var enUS []byte
 //go:embed lang/tr_TR.json
 var trTR []byte
 
+//go:embed lang/de_DE.json
+var deDE []byte
+
+//go:embed lang/es_ES.json
+var esES []byte
+
+//go:embed lang/fr_FR.json
+var frFR []byte
+
+//go:embed lang/zh_CN.json
+var zhCN []byte
+
 var strings_ map[string]string
 
 // Init loads the locale based on config lang, falling back to system LANG, then en_US.
@@ -26,6 +38,14 @@ func Init(lang string) {
 	switch normalise(lang) {
 	case "tr":
 		data = trTR
+	case "de":
+		data = deDE
+	case "es":
+		data = esES
+	case "fr":
+		data = frFR
+	case "zh":
+		data = zhCN
 	default:
 		data = enUS
 	}
@@ -36,12 +56,10 @@ func Init(lang string) {
 }
 
 // T returns the localised string for the given key.
-// Extra args are passed to fmt.Sprintf if the value contains format verbs.
 func T(key string, args ...any) string {
 	if strings_ == nil {
 		return key
 	}
-
 	val, ok := strings_[key]
 	if !ok {
 		return key
