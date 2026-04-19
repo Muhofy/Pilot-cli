@@ -18,6 +18,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.9.3] — 2026-04-19
+
+### Added
+- `internal/platform/platform.go` — OS/shell/path detection utility
+- `internal/ui/panel_windows.go` — ANSI color support via `ENABLE_VIRTUAL_TERMINAL_PROCESSING`
+- `internal/ui/prompt_windows.go` — numbered fallback prompt for Windows
+- `internal/ui/types.go` — shared `Option` and `SelectResult` types
+- `install.ps1` — Windows PowerShell one-liner installer
+- README: Windows install instructions (`irm ... | iex`)
+
+### Fixed
+- `prompt.go` — added `//go:build !windows` tag
+- `execCommand` — uses `$SHELL` on Unix, PowerShell → cmd fallback on Windows
+
+---
+
 ## [0.9.2] — 2026-04-19
 
 ### Added
@@ -171,7 +187,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/muhofy/Pilot-cli/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/muhofy/Pilot-cli/compare/v0.9.3...HEAD
+[0.9.3]: https://github.com/muhofy/Pilot-cli/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/muhofy/Pilot-cli/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/muhofy/Pilot-cli/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/muhofy/Pilot-cli/compare/v0.8.0...v0.9.0
